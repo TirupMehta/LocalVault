@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileVault | Your Private File Storage</title>
+  <style>
+    /* Modern CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Font Import */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.1);
+      --secondary: #f8fafc;
+      --text: #0f172a;
+      --text-light: #64748b;
+      --background: #ffffff;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      background-color: var(--background);
+      line-height: 1.5;
+      overflow-x: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Landing Page */
+    .landing-page {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      background-color: var(--background);
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+    }
+
+    .landing-page.hidden {
+      transform: translateY(-100%);
+    }
+
+    .landing-title {
+      font-size: 4.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, var(--primary), #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .landing-description {
+      font-size: 1.25rem;
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+      color: var(--text-light);
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+
+    .cta-button {
+      background: linear-gradient(to right, var(--primary), #818cf8);
+      color: white;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.8s ease-out 0.4s both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cta-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+
+    .cta-button:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(40, 40);
+      }
+    }
+
+    /* App Page */
+    .app-page {
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--secondary);
+    }
+
+    .app-header {
+      background-color: var(--background);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      z-index: 5;
+    }
+
+    .app-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .app-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .app-button {
+      background-color: var(--background);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .app-button:hover {
+      background-color: var(--secondary);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .app-button.primary {
+      background: linear-gradient(to right, var(--primary), #818cf8);
+      color: white;
+      border: none;
+    }
+
+    .app-button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .app-button.danger {
+      color: #ef4444;
+      border-color: #fecaca;
+    }
+
+    .app-button.danger:hover {
+      background-color: #fee2e2;
+      border-color: #ef4444;
+    }
+
+    .app-button.small {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .app-content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .privacy-banner {
+      background: linear-gradient(to right, #0f172a, #1e293b);
+      color: white;
+      padding: 1rem;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .privacy-text {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .file-upload-container {
+      margin-bottom: 1rem;
+      background-color: var(--background);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      border: 2px dashed var(--primary);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .file-upload-container.drag-over {
+      border-color: var(--primary-hover);
+      background-color: var(--primary-light);
+      transform: scale(1.01);
+    }
+
+    .file-upload-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, var(--primary-light), transparent);
+      background-size: 200% 200%;
+      animation: shine 3s infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes shine {
+      0% {
+        background-position: 0% 0%;
+      }
+      100% {
+        background-position: 200% 200%;
+      }
+    }
+
+    .file-upload-text {
+      margin-bottom: 1rem;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 1rem;
+      width: 100%;
+      height: 100%; /* Let’s make it take the full height of the parent */
+      display: flex; /* Use Flexbox to center content */
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+      text-align: center; /* Ensure text inside is centered if it wraps */
+    }
+
+    .file-upload-subtext {
+      color: var(--text-light);
+      margin-top: 1.2rem;
+      width: 100%;
+      height: 100%; /* Let’s make it take the full height of the parent */
+      display: flex; /* Use Flexbox to center content */
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+      text-align: center; /* Ensure text inside is centered if it wraps */
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .files-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .file-card {
+      background-color: var(--background);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border: 1px solid var(--border);
+    }
+
+    .file-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
+    }
+
+    .file-thumbnail {
+      width: 100%;
+      height: 140px;
+      margin-bottom: 1rem;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background-color: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .file-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .file-thumbnail svg {
+      width: 48px;
+      height: 48px;
+      color: var(--primary);
+    }
+
+    .file-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .file-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .file-size {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .file-date {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .file-action-button {
+      background-color: var(--secondary);
+      border: none;
+      padding: 0.375rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-action-button:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .file-action-button.delete:hover {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-light);
+      background-color: var(--background);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .empty-state svg {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      transform: translateY(150%);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .toast.warning {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background-color: var(--background);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .preview-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 50vh;
+      border-radius: var(--radius-sm);
+    }
+
+    .preview-pdf {
+      width: 100%;
+      height: 50vh;
+      border: none;
+    }
+
+    .preview-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .preview-name {
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-light);
+      font-size: 0.875rem;
+    }
+
+    .confirm-message {
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .confirm-warning {
+      color: #dc2626;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-spinner {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .loading .loading-spinner {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .landing-title {
+        font-size: 2.5rem;
+      }
+      
+      .landing-description {
+        font-size: 1rem;
+      }
+      
+      .files-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      
+      .app-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      
+      .app-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .privacy-banner {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+    }
+
+    /* Sorting Controls */
+    .sorting-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .sort-dropdown {
+      position: relative;
+    }
+
+    .sort-button {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .sort-button:hover {
+      border-color: var(--primary);
+    }
+
+    .sort-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--background);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      min-width: 180px;
+      z-index: 10;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .sort-menu.show {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .sort-option {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sort-option:hover {
+      background-color: var(--secondary);
+    }
+
+    .sort-option.active {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .search-container {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      transition: var(--transition);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      box-shadow: var(--shadow);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--text-light);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Progress bar for uploads */
+    .progress-container {
+      width: 100%;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background-color: var(--primary-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--primary), #818cf8);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .loading .progress-container {
+      display: block;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      background-color: var(--background);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    /* File type badges */
+    .file-type-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.625rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .file-type-badge.image {
+      background-color: #10b981;
+    }
+
+    .file-type-badge.pdf {
+      background-color: #ef4444;
+    }
+
+    .file-type-badge.audio {
+      background-color: #f59e0b;
+    }
+
+    .file-type-badge.video {
+      background-color: #3b82f6;
+    }
+
+    .file-type-badge.code {
+      background-color: #8b5cf6;
+    }
+
+    .file-type-badge.zip {
+      background-color: #6366f1;
+    }
+
+    .file-type-badge.other {
+      background-color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <!-- Landing Page -->
+  <section class="landing-page">
+    <h1 class="landing-title">FileVault</h1>
+    <p class="landing-description">Your private file storage solution. No tracking, no cloud, just your files in your browser.</p>
+    <button class="cta-button" id="get-started-btn">Get Started</button>
+  </section>
+
+  <!-- App Page -->
+  <main class="app-page">
+    <header class="app-header">
+      <div class="app-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path>
+          <path d="M14 2v6h6"></path>
+          <path d="M2 15h10"></path>
+          <path d="M9 18l3-3-3-3"></path>
+        </svg>
+        FileVault
+      </div>
+      <div class="app-actions">
+        <button class="app-button primary" id="upload-file-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="M12 12v6"></path>
+            <path d="m9 15 3-3 3 3"></path>
+          </svg>
+          Upload Files
+        </button>
+        <button class="app-button danger" id="clear-cache-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+          Nuke Everything
+        </button>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div class="privacy-banner">
+        <div class="privacy-text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          We don't track shit. Your files, your browser, your rules.
+        </div>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="total-files">0</div>
+          <div class="stat-label">Files</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="total-size">0 MB</div>
+          <div class="stat-label">Used Space</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="last-upload">Never</div>
+          <div class="stat-label">Last Upload</div>
+        </div>
+      </div>
+
+      <div class="sorting-controls">
+        <div class="search-container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Search files...">
+        </div>
+        <div class="sort-dropdown">
+          <button class="sort-button" id="sort-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5h10"></path>
+              <path d="M11 9h7"></path>
+              <path d="M11 13h4"></path>
+              <path d="M3 17h18"></path>
+              <path d="M3 5v8l4-4"></path>
+              <path d="M3 13V5l4 4"></path>
+            </svg>
+            Sort by: Name
+          </button>
+          <div class="sort-menu" id="sort-menu">
+            <div class="sort-option active" data-sort="name">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M7 12h10"></path>
+                <path d="M10 18h4"></path>
+              </svg>
+              Name
+            </div>
+            <div class="sort-option" data-sort="size">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              </svg>
+              Size
+            </div>
+            <div class="sort-option" data-sort="date">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Date
+            </div>
+            <div class="sort-option" data-sort="type">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              Type
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-upload-container" id="drop-area">
+        <p class="file-upload-text">Drag and drop files here</p>
+        <p class="file-upload-subtext">or click the upload button above</p>
+        <div class="loading-spinner"></div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-text" id="progress-text">Uploading files: 0%</div>
+        </div>
+        <input type="file" id="file-input" class="file-input" multiple>
+      </div>
+
+      <div class="files-container" id="files-container"></div>
+      
+      <footer class="footer">
+        <div class="footer-actions">
+          <button class="app-button small" id="clear-site-data-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 16h5v5"></path>
+            </svg>
+            Clear Site Data
+          </button>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="toast-icon"></svg>
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Preview Modal -->
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">File Preview</h3>
+        <button class="modal-close" id="preview-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-content" id="preview-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="app-button" id="preview-download">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download
+        </button>
+        <button class="app-button danger" id="preview-delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirm-title">Confirm Action</h3>
+        <button class="modal-close" id="confirm-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-message" id="confirm-message">Are you sure you want to perform this action?</p>
+        <p class="confirm-warning" id="confirm-warning">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="app-button" id="confirm-cancel">Cancel</button>
+        <button class="app-button danger" id="confirm-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize IndexedDB
+    let db;
+    const DB_NAME = 'filevault-db';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'files';
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = function(event) {
+      console.error("IndexedDB error:", event.target.errorCode);
+      showToast("Error initializing storage. Your browser might not support large file storage.", "error");
+    };
+
+    request.onupgradeneeded = function(event) {
+      db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+        store.createIndex("name", "name", { unique: false });
+        store.createIndex("type", "type", { unique: false });
+        store.createIndex("date", "date", { unique: false });
+      }
+    };
+
+    request.onsuccess = function(event) {
+      db = event.target.result;
+      console.log("IndexedDB initialized successfully");
+      renderFiles();
+      updateStats();
+    };
+
+    // DOM Elements
+    const landingPage = document.querySelector('.landing-page');
+    const getStartedBtn = document.getElementById('get-started-btn');
+    const uploadFileBtn = document.getElementById('upload-file-btn');
+    const fileInput = document.getElementById('file-input');
+    const dropArea = document.getElementById('drop-area');
+    const filesContainer = document.getElementById('files-container');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
+    const clearSiteDataBtn = document.getElementById('clear-site-data-btn');
+    const searchInput = document.getElementById('search-input');
+    const sortButton = document.getElementById('sort-button');
+    const sortMenu = document.getElementById('sort-menu');
+    const sortOptions = document.querySelectorAll('.sort-option');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const totalFilesEl = document.getElementById('total-files');
+    const totalSizeEl = document.getElementById('total-size');
+    const lastUploadEl = document.getElementById('last-upload');
+    
+    // Preview Modal Elements
+    const previewModal = document.getElementById('preview-modal');
+    const previewClose = document.getElementById('preview-close');
+    const previewContent = document.getElementById('preview-content');
+    const previewDownload = document.getElementById('preview-download');
+    const previewDelete = document.getElementById('preview-delete');
+    
+    // Confirm Modal Elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmClose = document.getElementById('confirm-close');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const confirmWarning = document.getElementById('confirm-warning');
+    const confirmCancel = document.getElementById('confirm-cancel');
+    const confirmConfirm = document.getElementById('confirm-confirm');
+
+    // File Icons SVG
+    const fileIcons = {
+      default: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
+      image: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>`,
+      pdf: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M14 18h-4"></path><path d="M10 18v-4"></path><path d="M14 14h-4"></svg>`,
+      audio: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`,
+      video: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"></path><rect x="2" y="6" width="14" height="12" rx="2" ry="2"></rect></svg>`,
+      code: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
+      exe: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M9 9h6v6H9z"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/></svg>`,
+      zip: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8"></path><path d="M3 4h18"></path><path d="M7 4v4"></path><path d="M17 4v4"></path><path d="M12 11v.01"></path><path d="M12 15v.01"></path></svg>`
+    };
+
+    // Toast Icons
+    const toastIcons = {
+      success: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+      error: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+      warning: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
+    };
+
+    // Global Variables
+    let currentSortBy = 'name';
+    let currentSortOrder = 'asc';
+    let currentSearchTerm = '';
+    let currentPreviewFile = null;
+    let confirmCallback = null;
+    let totalFiles = 0;
+    let processedFiles = 0;
+
+    // Event Listeners
+    getStartedBtn.addEventListener('click', () => {
+      landingPage.classList.add('hidden');
+    });
+
+    uploadFileBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', handleFileUpload);
+
+    clearCacheBtn.addEventListener('click', () => {
+      showConfirmModal(
+        'Nuke Everything',
+        'Are you sure you want to delete all files?',
+        'This will permanently delete all your stored files and cannot be undone.',
+        () => {
+          clearAllFiles();
+          showToast('All files have been deleted!', 'success');
+        }
+      );
+    });
+
+    clearSiteDataBtn.addEventListener('click', () => {
+      showConfirmModal(
+        'Clear Site Data',
+        'Are you sure you want to clear all site data?',
+        'This will delete all cookies, storage, and cache for this site.',
+        () => {
+          indexedDB.deleteDatabase(DB_NAME);
+          localStorage.clear();
+          sessionStorage.clear();
+          showToast('All site data has been cleared!', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
+      );
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      currentSearchTerm = e.target.value.toLowerCase();
+      renderFiles();
+    });
+
+    sortButton.addEventListener('click', () => {
+      sortMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sortButton.contains(e.target) && !sortMenu.contains(e.target)) {
+        sortMenu.classList.remove('show');
+      }
+    });
+
+    sortOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const sortBy = option.getAttribute('data-sort');
+        if (currentSortBy === sortBy) {
+          currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortBy = sortBy;
+          currentSortOrder = 'asc';
+        }
+        
+        sortOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        sortButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5h10"></path>
+            <path d="M11 9h7"></path>
+            <path d="M11 13h4"></path>
+            <path d="M3 17h18"></path>
+            <path d="M3 5v8l4-4"></path>
+            <path d="M3 13V5l4 4"></path>
+          </svg>
+          Sort by: ${sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+        `;
+        
+        sortMenu.classList.remove('show');
+        renderFiles();
+      });
+    });
+
+    // Preview Modal Events
+    previewClose.addEventListener('click', () => {
+      previewModal.classList.remove('show');
+      currentPreviewFile = null;
+    });
+
+    previewDownload.addEventListener('click', () => {
+      if (currentPreviewFile) {
+        downloadFile(currentPreviewFile);
+      }
+    });
+
+    previewDelete.addEventListener('click', () => {
+      if (currentPreviewFile) {
+        showConfirmModal(
+          'Delete File',
+          `Are you sure you want to delete "${currentPreviewFile.name}"?`,
+          'This action cannot be undone.',
+          () => {
+            deleteFile(currentPreviewFile.id);
+            previewModal.classList.remove('show');
+            currentPreviewFile = null;
+          }
+        );
+      }
+    });
+
+    // Confirm Modal Events
+    confirmClose.addEventListener('click', () => {
+      confirmModal.classList.remove('show');
+      confirmCallback = null;
+    });
+
+    confirmCancel.addEventListener('click', () => {
+      confirmModal.classList.remove('show');
+      confirmCallback = null;
+    });
+
+    confirmConfirm.addEventListener('click', () => {
+      if (confirmCallback) {
+        confirmCallback();
+      }
+      confirmModal.classList.remove('show');
+      confirmCallback = null;
+    });
+
+    // Drag and Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => {
+        dropArea.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => {
+        dropArea.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    }, false);
+
+    // File Handling Functions
+    function handleFileUpload(e) {
+      const files = e.target.files;
+      handleFiles(files);
+      e.target.value = ''; // Reset input
+    }
+
+    function handleFiles(files) {
+      if (files.length === 0) return;
+      
+      dropArea.classList.add('loading');
+      
+      // Reset progress
+      totalFiles = files.length;
+      processedFiles = 0;
+      updateProgress(0);
+      
+      // Process files in batches to avoid blocking the UI
+      const fileArray = Array.from(files);
+      
+      // Process files in batches
+      const processFileBatch = (startIndex) => {
+        const batchSize = 5; // Process 5 files at a time
+        const endIndex = Math.min(startIndex + batchSize, fileArray.length);
+        const batch = fileArray.slice(startIndex, endIndex);
+        
+        const batchPromises = batch.map(file => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+              const fileData = {
+                id: generateUniqueId(),
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: e.target.result,
+                date: new Date().toISOString()
+              };
+              
+              processedFiles++;
+              updateProgress(Math.floor((processedFiles / totalFiles) * 100));
+              
+              resolve(fileData);
+            };
+            
+            reader.onerror = () => {
+              processedFiles++;
+              updateProgress(Math.floor((processedFiles / totalFiles) * 100));
+              reject(new Error(`Failed to read file: ${file.name}`));
+            };
+            
+            reader.readAsDataURL(file);
+          });
+        });
+        
+        Promise.all(batchPromises)
+          .then(results => {
+            // Save files to IndexedDB
+            saveFilesToDB(results);
+            
+            if (endIndex < fileArray.length) {
+              // Process next batch
+              setTimeout(() => {
+                processFileBatch(endIndex);
+              }, 0);
+            } else {
+              // All files processed
+              dropArea.classList.remove('loading');
+              showToast(`Successfully uploaded ${fileArray.length} files!`, 'success');
+              updateStats();
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            dropArea.classList.remove('loading');
+            showToast(`Error uploading files: ${error.message}`, 'error');
+          });
+      };
+      
+      // Start processing files
+      processFileBatch(0);
+    }
+
+    function updateProgress(percent) {
+      progressFill.style.width = `${percent}%`;
+      progressText.textContent = `Uploading files: ${percent}%`;
+    }
+
+    function saveFilesToDB(fileDataArray) {
+      if (!db) {
+        showToast("Database not initialized. Please refresh the page.", "error");
+        return;
+      }
+      
+      const transaction = db.transaction([STORE_NAME], "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      
+      fileDataArray.forEach(fileData => {
+        store.put(fileData);
+      });
+      
+      transaction.oncomplete = () => {
+        renderFiles();
+        // Update last upload time
+        if (fileDataArray.length > 0) {
+          localStorage.setItem('last-upload', new Date().toISOString());
+        }
+      };
+      
+      transaction.onerror = (event) => {
+        console.error("Transaction error:", event.target.error);
+        showToast("Error saving files to database", "error");
+      };
+    }
+
+    function getAllFiles(callback) {
+      if (!db) {
+        callback([]);
+        return;
+      }
+      
+      const transaction = db.transaction([STORE_NAME], "readonly");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        callback(request.result);
+      };
+      
+      request.onerror = (event) => {
+        console.error("Error getting files:", event.target.error);
+        callback([]);
+      };
+    }
+
+    function deleteFile(fileId) {
+      if (!db) {
+        showToast("Database not initialized. Please refresh the page.", "error");
+        return;
+      }
+      
+      const transaction = db.transaction([STORE_NAME], "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete(fileId);
+      
+      request.onsuccess = () => {
+        renderFiles();
+        updateStats();
+        showToast("File deleted successfully!", "success");
+      };
+      
+      request.onerror = (event) => {
+        console.error("Error deleting file:", event.target.error);
+        showToast("Error deleting file", "error");
+      };
+    }
+
+    function clearAllFiles() {
+      if (!db) {
+        showToast("Database not initialized. Please refresh the page.", "error");
+        return;
+      }
+      
+      const transaction = db.transaction([STORE_NAME], "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.clear();
+      
+      request.onsuccess = () => {
+        renderFiles();
+        updateStats();
+      };
+      
+      request.onerror = (event) => {
+        console.error("Error clearing files:", event.target.error);
+        showToast("Error clearing files", "error");
+      };
+    }
+
+    function downloadFile(file) {
+      const link = document.createElement('a');
+      link.href = file.data;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function getFileIcon(file) {
+      if (file.type.startsWith('image/')) {
+        return fileIcons.image;
+      } else if (file.type === 'application/pdf') {
+        return fileIcons.pdf;
+      } else if (file.type.startsWith('audio/')) {
+        return fileIcons.audio;
+      } else if (file.type.startsWith('video/')) {
+        return fileIcons.video;
+      } else if (file.type.includes('zip') || file.type.includes('compressed')) {
+        return fileIcons.zip;
+      } else if (file.type.includes('javascript') || file.type.includes('html') || file.type.includes('css') || file.type.includes('json')) {
+        return fileIcons.code;
+      } else {
+        return fileIcons.default;
+      }
+    }
+
+    function getFileTypeBadge(file) {
+      if (file.type.startsWith('image/')) {
+        return '<span class="file-type-badge image">Image</span>';
+      } else if (file.type === 'application/pdf') {
+        return '<span class="file-type-badge pdf">PDF</span>';
+      } else if (file.type.startsWith('audio/')) {
+        return '<span class="file-type-badge audio">Audio</span>';
+      } else if (file.type.startsWith('video/')) {
+        return '<span class="file-type-badge video">Video</span>';
+      } else if (file.type.includes('zip') || file.type.includes('compressed')) {
+        return '<span class="file-type-badge zip">Archive</span>';
+      } else if (file.type.includes('javascript') || file.type.includes('html') || file.type.includes('css') || file.type.includes('json')) {
+        return '<span class="file-type-badge code">Code</span>';
+      } else {
+        return '<span class="file-type-badge other">File</span>';
+      }
+    }
+
+    function renderFiles() {
+      getAllFiles(files => {
+        // Filter files by search term
+        if (currentSearchTerm) {
+          files = files.filter(file => {
+            return file.name.toLowerCase().includes(currentSearchTerm);
+          });
+        }
+        
+        // Sort files
+        files.sort((a, b) => {
+          let comparison = 0;
+          
+          switch (currentSortBy) {
+            case 'name':
+              comparison = a.name.localeCompare(b.name);
+              break;
+            case 'size':
+              comparison = a.size - b.size;
+              break;
+            case 'date':
+              comparison = new Date(a.date) - new Date(b.date);
+              break;
+            case 'type':
+              comparison = (a.type || '').localeCompare(b.type || '');
+              break;
+            default:
+              comparison = a.name.localeCompare(b.name);
+          }
+          
+          return currentSortOrder === 'asc' ? comparison : -comparison;
+        });
+        
+        if (files.length === 0) {
+          filesContainer.innerHTML = `
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <h3>No files found</h3>
+              <p>Upload files to get started</p>
+            </div>
+          `;
+          return;
+        }
+        
+        filesContainer.innerHTML = '';
+        
+        // Render files
+        files.forEach(file => {
+          const fileCard = document.createElement('div');
+          fileCard.className = 'file-card';
+          
+          const isImage = file.type && file.type.startsWith('image/');
+          const isPdf = file.type === 'application/pdf';
+          
+          const thumbnailContent = isImage 
+            ? `<img src="${file.data}" alt="${file.name}" loading="lazy">` 
+            : getFileIcon(file);
+          
+          const fileDate = new Date(file.date).toLocaleDateString();
+          const typeBadge = getFileTypeBadge(file);
+          
+          fileCard.innerHTML = `
+            <div class="file-thumbnail">
+              ${thumbnailContent}
+              ${typeBadge}
+            </div>
+            <div class="file-info">
+              <h3 class="file-name">${file.name}</h3>
+              <div class="file-meta">
+                <span class="file-size">${formatFileSize(file.size)}</span>
+                <span class="file-date">${fileDate}</span>
+              </div>
+            </div>
+            <div class="file-actions">
+              ${(isImage || isPdf) ? `
+                <button class="file-action-button preview" title="Preview">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              ` : ''}
+              <button class="file-action-button download" title="Download">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+              <button class="file-action-button delete" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          `;
+          
+          const previewBtn = fileCard.querySelector('.preview');
+          if (previewBtn) {
+            previewBtn.addEventListener('click', () => {
+              showPreviewModal(file);
+            });
+          }
+          
+          const downloadBtn = fileCard.querySelector('.download');
+          downloadBtn.addEventListener('click', () => downloadFile(file));
+          
+          const deleteBtn = fileCard.querySelector('.delete');
+          deleteBtn.addEventListener('click', () => {
+            showConfirmModal(
+              'Delete File',
+              `Are you sure you want to delete "${file.name}"?`,
+              'This action cannot be undone.',
+              () => deleteFile(file.id)
+            );
+          });
+          
+          fileCard.addEventListener('click', (e) => {
+            if (!e.target.closest('.file-action-button')) {
+              if (isImage || isPdf) {
+                showPreviewModal(file);
+              } else {
+                downloadFile(file);
+              }
+            }
+          });
+          
+          filesContainer.appendChild(fileCard);
+        });
+      });
+    }
+
+    function updateStats() {
+      getAllFiles(files => {
+        // Update total files count
+        totalFilesEl.textContent = files.length;
+        
+        // Calculate total size
+        const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+        totalSizeEl.textContent = formatFileSize(totalSize);
+        
+        // Get last upload time
+        const lastUpload = localStorage.getItem('last-upload');
+        if (lastUpload) {
+          const date = new Date(lastUpload);
+          lastUploadEl.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        } else {
+          lastUploadEl.textContent = 'Never';
+        }
+      });
+    }
+
+    function showPreviewModal(file) {
+      currentPreviewFile = file;
+      previewContent.innerHTML = '';
+      
+      // Add a 100ms delay for image/PDF previews to fix blank modals
+      setTimeout(() => {
+        if (file.type.startsWith('image/')) {
+          previewContent.innerHTML = `
+            <img src="${file.data}" alt="${file.name}" class="preview-image">
+            <div class="preview-info">
+              <h3 class="preview-name">${file.name}</h3>
+              <div class="preview-meta">
+                <span>${formatFileSize(file.size)}</span>
+                <span>${new Date(file.date).toLocaleString()}</span>
+              </div>
+            </div>
+          `;
+        } else if (file.type === 'application/pdf') {
+          previewContent.innerHTML = `
+            <iframe src="${file.data}" class="preview-pdf"></iframe>
+            <div class="preview-info">
+              <h3 class="preview-name">${file.name}</h3>
+              <div class="preview-meta">
+                <span>${formatFileSize(file.size)}</span>
+                <span>${new Date(file.date).toLocaleString()}</span>
+              </div>
+            </div>
+          `;
+        }
+      }, 100);
+      
+      previewModal.classList.add('show');
+    }
+
+    function showConfirmModal(title, message, warning, callback) {
+      confirmTitle.textContent = title;
+      confirmMessage.textContent = message;
+      confirmWarning.textContent = warning;
+      confirmCallback = callback;
+      confirmModal.classList.add('show');
+    }
+
+    function showToast(message, type) {
+      toastMessage.textContent = message;
+      toastIcon.innerHTML = toastIcons[type];
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function generateUniqueId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+  </script>
+</body>
+</html>
