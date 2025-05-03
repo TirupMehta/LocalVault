@@ -1,6 +1,6 @@
-## FileVault
+## LocalVault
 
-**FileVault** is a secure, browser-based file storage solution that prioritizes privacy. It stores your files locally in the browser using IndexedDB—no cloud, no tracking. With a clean and modern interface, you can upload, manage, and preview files effortlessly.
+**LocalVault** is a secure, browser-based file storage solution that prioritizes privacy. It stores your files locally in the browser using IndexedDB—no cloud, no tracking. With a clean and modern interface, you can upload, manage, and preview files effortlessly.
 
 ---
 
